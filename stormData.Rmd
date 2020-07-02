@@ -16,19 +16,24 @@ Purpose of this analysis is to understand the actual impact of historical weathe
 
 # Data Processing
 
-1. Loading all the following packages:
 
-```{r} 
-library(dplyr)
-library(ggplot2)
-library(gridExtra)
-library(knitr)
-library(R.utils)
-```
+1. Loading Data
 
-2. Loading Data
+#load packages
 
 ```{r}
+
+library(dplyr)
+
+library(gridExtra)
+
+library(ggplot2)
+
+```
+
+
+```{r}
+
 setwd("C:\\Users\\A S U S\\Desktop\\project")
 
 stormdata<- read.csv("repdata_data_StormData.csv",header=T)
@@ -36,12 +41,13 @@ stormdata<- read.csv("repdata_data_StormData.csv",header=T)
 colnames(stormdata)
 ```
 
-3. Processing the data considering health and economic consequences
+2. Processing the data considering health and economic consequences
 
 The only columns we need for the analysis are the ones related to the weather events, and their health and economic damages: “EVTYPE”, “FATALITIES”, “INJURIES”, “PROPDMG”, “PROPDMGEXP”,“CROPDMG” and “CROPDMGEXP”.
 
 
 ```{r}
+
 stormdata1<- stormdata[,c(8,23:28)]
 
 # Subset the data set for "FATALITIES" and "INJURIES" analysis
@@ -51,7 +57,7 @@ FTS <- select(stormdata1,c(EVTYPE,FATALITIES))
 INS <- select(stormdata1,c(EVTYPE,INJURIES))
 ```
 
-4. Processing the data considering economic consequences
+3. Processing the data considering economic consequences
 
 ```{r}
 PRP <- arrange(count(select(stormdata1,c(EVTYPE,PROPDMG,PROPDMGEXP)),PROPDMGEXP),desc(n))
@@ -99,7 +105,7 @@ RFTS <- slice(RFTS,1:25)
 
 RFTS$EVTYPE <- factor(RFTS$EVTYPE,levels=RFTS$EVTYPE[order(-RFTS$Fatalities)])
 
-gRFTS <- ggplot(RFTS,aes(EVTYPE,Fatalities),fill=Fatalities)+geom_bar(stat="identity",fill="blue",color="black")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Number of Fatalities by Event Type")+labs(x="Event Type",y="Number of Fatalities")
+gRFTS <- ggplot(RFTS,aes(EVTYPE,Fatalities),fill=Fatalities)+geom_bar(stat="identity",fill="blue",color="black")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Number of Fatalities by Event Type")+labs(x="Event Type",y="Number of Fatalities")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=6),axis.title.x=element_text(size=5),axis.title.y=element_text(size=8))
 
 #Considering INJURIES
 
@@ -110,7 +116,7 @@ RINS <- slice(RINS,1:25)
 
 RINS$EVTYPE <- factor(RINS$EVTYPE,levels=RINS$EVTYPE[order(-RINS$Injuries)])
 
-gRINS <- ggplot(RINS,aes(EVTYPE,Injuries),fill=Injuries)+geom_bar(stat="identity",fill="blue",color="black")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Number of Injuries by Event Type")+labs(x="Event Type",y="Number of Injuries")
+gRINS <- ggplot(RINS,aes(EVTYPE,Injuries),fill=Injuries)+geom_bar(stat="identity",fill="blue",color="black")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Number of Injuries by Event Type")+labs(x="Event Type",y="Number of Injuries")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=5),axis.title.x=element_text(size=5),axis.title.y=element_text(size=7))
 
 # Plot together
 
@@ -136,7 +142,7 @@ s4$EVTYPE<- as.factor(s4$EVTYPE)
 
 s4$EVTYPE <- factor(s4$EVTYPE, levels = s4$EVTYPE[order(-s4$Cost)])  
 
-g4<- ggplot(s4,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust = 0.5))+ xlab("Event Type")+ ylab("Cost in Prop (Billion Dollars)")+ggtitle("Total Cost in Prop by Event Type (Billion Dollars)")
+g4<- ggplot(s4,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust = 0.5))+ xlab("Event Type")+ ylab("Cost in Prop (Billion Dollars)")+ggtitle("Total Cost in Prop by Event Type (Billion)")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=5),axis.title.x=element_text(size=5),axis.title.y=element_text(size=7))
 
 
 # Considering CROPDMG
@@ -149,7 +155,7 @@ s6<- slice(s5,1:25)
 s6$Cost<- s6$Cost/1000000000
 s6$EVTYPE<- factor(s6$EVTYPE,levels= s6$EVTYPE[order(-s6$Cost)])
 
-g6<- ggplot(s6,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+xlab("Event Type")+ylab("Cost in Crop (Billion Dollars)")+ggtitle("Total Cost in Crop by Event Type (Billion Dollars)")
+g6<- ggplot(s6,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+xlab("Event Type")+ylab("Cost in Crop (Billion)")+ggtitle("Total Cost in Crop by Event Type (Billion Dollars)")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=5),axis.title.x=element_text(size=5),axis.title.y=element_text(size=7))
 
 
 #Plot together
@@ -170,7 +176,7 @@ s9 <- slice(s8,1:25)
 
 s9$EVTYPE<- factor(s9$EVTYPE,levels=s9$EVTYPE[order(-s9$Cost)])
 
-g9 <- ggplot(s9,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Cost in Prop and Crop by Event Type (Billion Dollars)")+labs(x="Event Type",y="Cost in Prop and Crop (Billion Dollars)")
+g9 <- ggplot(s9,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Cost in Prop and Crop by Event Type (Billion)")+labs(x="Event Type",y="Cost in Prop and Crop (Billion Dollars)")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=5),axis.title.x=element_text(size=5),axis.title.y=element_text(size=7))
 
 g9 
 
