@@ -38,29 +38,29 @@ setwd("C:\\Users\\A S U S\\Desktop\\project")
 
 stormdata<- read.csv("repdata_data_StormData.csv",header=T)
 
-colnames(stormdata)
 ```
 
-2. Processing the data considering health and economic consequences
+2. Processing data considering health and economic consequences
 
-The only columns we need for the analysis are the ones related to the weather events, and their health and economic damages: “EVTYPE”, “FATALITIES”, “INJURIES”, “PROPDMG”, “PROPDMGEXP”,“CROPDMG” and “CROPDMGEXP”.
+The only columns we need for the analysis are the ones related to the weather events. And their damages: “EVTYPE”, “FATALITIES”, “INJURIES”, “PROPDMG”, “PROPDMGEXP”,“CROPDMG” and “CROPDMGEXP”.
 
 
 ```{r}
 
-stormdata1<- stormdata[,c(8,23:28)]
+newdata<- stormdata[,c(8,23:28)]
 
 # Subset the data set for "FATALITIES" and "INJURIES" analysis
 
-FTS <- select(stormdata1,c(EVTYPE,FATALITIES))
+FTS <- select(newdata,c(EVTYPE,FATALITIES))
 
-INS <- select(stormdata1,c(EVTYPE,INJURIES))
+INS <- select(newdata,c(EVTYPE,INJURIES))
 ```
 
 3. Processing the data considering economic consequences
 
 ```{r}
-PRP <- arrange(count(select(stormdata1,c(EVTYPE,PROPDMG,PROPDMGEXP)),PROPDMGEXP),desc(n))
+
+PRP <- arrange(count(select(newdata,c(EVTYPE,PROPDMG,PROPDMGEXP)),PROPDMGEXP),desc(n))
 PRP <- slice(PRP,-1)
 
 CRP<- arrange(count(select(stormdata,c(EVTYPE,CROPDMG,CROPDMGEXP)),CROPDMGEXP),desc(n))
@@ -69,23 +69,23 @@ CRP<- slice(CRP,-1)
 # Calculate the percentage of the different cases of PROPDMGEXP and CROPDMGEXP
 
 PRP$Percentage <- as.numeric(round((PRP$n/sum(PRP$n))*100,2))
-SPRP <- sum(PRP[PRP$PROPDMGEXP=="K"|PRP$PROPDMGEXP=="B"|PRP$PROPDMGEXP=="M",]$Percentage)
+SumPRP <- sum(PRP[PRP$PROPDMGEXP=="K"|PRP$PROPDMGEXP=="B"|PRP$PROPDMGEXP=="M",]$Percentage)
 
 CRP$Percentage<- as.numeric(round((CRP$n/sum(CRP$n))*100,2))
-SCRP<- sum(CRP[CRP$CROPDMGEXP=="K"|CRP$CROPDMGEXP=="B"|CRP$CROPDMGEXP=="M",]$Percentage)
+SumCRP<- sum(CRP[CRP$CROPDMGEXP=="K"|CRP$CROPDMGEXP=="B"|CRP$CROPDMGEXP=="M",]$Percentage)
 ```
 
-Therefore, the PROPDMG cases labeled by “K”, “M”, or “B” are 99.92483% of the cases and for CROPDMG are 99.98274% of the cases. Consequently, we are only going to use these labeled cases.
+Therefore, the PROPDMG cases labeled by “K”, “M”, or “B” are 99.92483% of the cases and for CROPDMG are 99.98274% of the cases. As a result, I'm going to use these labels.
 
 
 ```{r}
 # Subset the data set for "PROPDMG" and "CROPDMG" analysis
 
-s1<- stormdata1 %>% select(c(EVTYPE,PROPDMG,PROPDMGEXP)) %>% filter(PROPDMGEXP=="K"|PROPDMGEXP=="M"|PROPDMGEXP=="B")
-s1$Cost <- ifelse(s1$PROPDMGEXP=="K",s1$PROPDMG*1000,ifelse(s1$PROPDMGEXP=="M",s1$PROPDMG*1000000,s1$PROPDMG*1000000000))
+nd1<- newdata %>% select(c(EVTYPE,PROPDMG,PROPDMGEXP)) %>% filter(PROPDMGEXP=="K"|PROPDMGEXP=="M"|PROPDMGEXP=="B")
+nd1$Cost <- ifelse(nd1$PROPDMGEXP=="K",nd1$PROPDMG*1000,ifelse(nd1$PROPDMGEXP=="M",nd1$PROPDMG*1000000,nd1$PROPDMG*1000000000))
 
-s2<- stormdata1 %>% select(c(EVTYPE,CROPDMG,CROPDMGEXP)) %>% filter(CROPDMGEXP=="K"|CROPDMGEXP=="M"|CROPDMGEXP=="B")
-s2$Cost <- ifelse(s2$CROPDMGEXP=="K",s2$CROPDMG*1000,ifelse(s2$CROPDMGEXP=="M",s2$CROPDMG*1000000,s2$CROPDMG*1000000000))
+nd2<- newdata %>% select(c(EVTYPE,CROPDMG,CROPDMGEXP)) %>% filter(CROPDMGEXP=="K"|CROPDMGEXP=="M"|CROPDMGEXP=="B")
+nd2$Cost <- ifelse(nd2$CROPDMGEXP=="K",nd2$CROPDMG*1000,ifelse(nd2$CROPDMGEXP=="M",nd2$CROPDMG*1000000,nd2$CROPDMG*1000000000))
 ```
 
 # Results
@@ -105,7 +105,7 @@ RFTS <- slice(RFTS,1:25)
 
 RFTS$EVTYPE <- factor(RFTS$EVTYPE,levels=RFTS$EVTYPE[order(-RFTS$Fatalities)])
 
-gRFTS <- ggplot(RFTS,aes(EVTYPE,Fatalities),fill=Fatalities)+geom_bar(stat="identity",fill="blue",color="black")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Number of Fatalities by Event Type")+labs(x="Event Type",y="Number of Fatalities")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=6),axis.title.x=element_text(size=5),axis.title.y=element_text(size=8))
+gRFTS <- ggplot(RFTS,aes(EVTYPE,Fatalities),fill=Fatalities)+geom_bar(stat="identity",fill="blue",color="black")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Number of Fatalities by Event Type")+xlab("Event Type")+ylab("Number of Fatalities")+theme(plot.title = element_text(hjust = 0.5,size = 10, face = "bold"))
 
 #Considering INJURIES
 
@@ -116,9 +116,9 @@ RINS <- slice(RINS,1:25)
 
 RINS$EVTYPE <- factor(RINS$EVTYPE,levels=RINS$EVTYPE[order(-RINS$Injuries)])
 
-gRINS <- ggplot(RINS,aes(EVTYPE,Injuries),fill=Injuries)+geom_bar(stat="identity",fill="blue",color="black")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Number of Injuries by Event Type")+labs(x="Event Type",y="Number of Injuries")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=5),axis.title.x=element_text(size=5),axis.title.y=element_text(size=7))
+gRINS <- ggplot(RINS,aes(EVTYPE,Injuries),fill=Injuries)+geom_bar(stat="identity",fill="blue",color="black")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Number of Injuries by Event Type")+xlab("Event Type")+ylab("Number of Injuries")+theme(plot.title = element_text(hjust = 0.5,size = 10, face = "bold"))
 
-# Plot together
+# Plot graph together
 
 grid.arrange(gRFTS,gRINS,ncol=2)
 
@@ -130,35 +130,35 @@ grid.arrange(gRFTS,gRINS,ncol=2)
 ```{r}
 # Considering PROPDMG
 
-s3<- s1 %>% group_by(EVTYPE) %>% summarise(Cost= sum(Cost)) %>% arrange(desc(Cost))
+nd3<- nd1 %>% group_by(EVTYPE) %>% summarise(Cost= sum(Cost)) %>% arrange(desc(Cost))
 
-s4<- slice(s3,1:25)
+nd4<- slice(nd3,1:25)
 
 # Transfor the cost column into "Billion dollars"
  
-s4$Cost <- s4$Cost/1000000000
+nd4$Cost <- nd4$Cost/1000000000
 
-s4$EVTYPE<- as.factor(s4$EVTYPE)
+nd4$EVTYPE<- as.factor(nd4$EVTYPE)
 
-s4$EVTYPE <- factor(s4$EVTYPE, levels = s4$EVTYPE[order(-s4$Cost)])  
+nd4$EVTYPE <- factor(nd4$EVTYPE, levels = nd4$EVTYPE[order(-nd4$Cost)])  
 
-g4<- ggplot(s4,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust = 0.5))+ xlab("Event Type")+ ylab("Cost in Prop (Billion Dollars)")+ggtitle("Total Cost in Prop by Event Type (Billion)")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=5),axis.title.x=element_text(size=5),axis.title.y=element_text(size=7))
+g4<- ggplot(nd4,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust = 0.5))+ xlab("Event Type")+ ylab("Cost in Prop (Billion Dollars)")+ggtitle("Total Cost in Prop by Event Type (Billion)")+theme(plot.title = element_text(hjust = 0.5,size = 10, face = "bold"))
 
 
 # Considering CROPDMG
 
-s5<- s2 %>% group_by(EVTYPE) %>% summarise(Cost=sum(Cost)) %>% arrange(desc(Cost))
-s6<- slice(s5,1:25)
+nd5<- nd2 %>% group_by(EVTYPE) %>% summarise(Cost=sum(Cost)) %>% arrange(desc(Cost))
+nd6<- slice(nd5,1:25)
 
 # Transfor the cost column into "Billion dollars"
 
-s6$Cost<- s6$Cost/1000000000
-s6$EVTYPE<- factor(s6$EVTYPE,levels= s6$EVTYPE[order(-s6$Cost)])
+nd6$Cost<- nd6$Cost/1000000000
+nd6$EVTYPE<- factor(nd6$EVTYPE,levels= nd6$EVTYPE[order(-nd6$Cost)])
 
-g6<- ggplot(s6,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+xlab("Event Type")+ylab("Cost in Crop (Billion)")+ggtitle("Total Cost in Crop by Event Type (Billion Dollars)")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=5),axis.title.x=element_text(size=5),axis.title.y=element_text(size=7))
+g6<- ggplot(nd6,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+xlab("Event Type")+ylab("Cost in Crop (Billion)")+ggtitle("Total Cost in Crop by Event Type (Billion Dollars)")+theme(plot.title = element_text(hjust = 0.5,size = 10, face = "bold"))
 
 
-#Plot together
+#Plot graph together
 
 grid.arrange(g4,g6,ncol=2)
 
@@ -170,13 +170,13 @@ grid.arrange(g4,g6,ncol=2)
 ```{r}
 # Considering PROPDMG and CROPDMG together
 
-s7 <- rbind(s4,s6)
-s8 <- s7 %>% group_by(EVTYPE) %>% summarise(Cost=sum(Cost)) %>% arrange(desc(Cost))
-s9 <- slice(s8,1:25)
+nd7 <- rbind(nd4,nd6)
+nd8 <- nd7 %>% group_by(EVTYPE) %>% summarise(Cost=sum(Cost)) %>% arrange(desc(Cost))
+nd9 <- slice(nd8,1:25)
 
-s9$EVTYPE<- factor(s9$EVTYPE,levels=s9$EVTYPE[order(-s9$Cost)])
+nd9$EVTYPE<- factor(nd9$EVTYPE,levels=nd9$EVTYPE[order(-nd9$Cost)])
 
-g9 <- ggplot(s9,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Cost in Prop and Crop by Event Type (Billion)")+labs(x="Event Type",y="Cost in Prop and Crop (Billion Dollars)")+theme(plot.title = element_text(hjust = 0.5,size = 8, face = "bold"),axis.text.x = element_text(size=5),axis.title.x=element_text(size=5),axis.title.y=element_text(size=7))
+g9 <- ggplot(nd9,aes(EVTYPE,Cost),fill=Cost)+ geom_bar(stat="identity",color="black",fill="green")+ theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))+labs(title="Total Cost in Prop and Crop by Event Type (Billion)")+xlab("Event Type")+ylab("Cost in Prop and Crop (Billion Dollars)")+theme(plot.title = element_text(hjust = 0.5,size = 10, face = "bold"))
 
 g9 
 
